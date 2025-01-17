@@ -27,11 +27,11 @@ project(ORC C CXX)
 
 # Version number of package
 SET(CPACK_PACKAGE_VERSION_MAJOR "2")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "2")
 SET(CPACK_PACKAGE_VERSION_PATCH "0-SNAPSHOT")
 SET(ORC_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For clang-tidy.
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 option (BUILD_JAVA
     "Include ORC Java library in the build process"
@@ -77,9 +77,17 @@ option(BUILD_ENABLE_AVX512
     "Enable build with AVX512 at compile time"
     OFF)
 
+option(ENABLE_ASAN
+    "Enable Address Sanitizer"
+    OFF)
+
 option(ORC_PACKAGE_KIND
     "Arbitrary string that identifies the kind of package"
     "")
+
+option(ORC_ENABLE_CLANG_TOOLS
+    "Enable Clang tools"
+    ON)
 
 # Make sure that a build type is selected
 if (NOT CMAKE_BUILD_TYPE)
@@ -152,6 +160,16 @@ elseif (MSVC)
   set (WARN_FLAGS "${WARN_FLAGS} -wd4521") # multiple copy constructors specified
   set (WARN_FLAGS "${WARN_FLAGS} -wd4146") # unary minus operator applied to unsigned type, result still unsigned
 endif ()
+# Configure Address Sanitizer if enabled
+if (ENABLE_ASAN)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+    message(STATUS "Address Sanitizer enabled")
+  else()
+    message(WARNING "Address Sanitizer is only supported for GCC and Clang compilers")
+  endif()
+endif()
 
 enable_testing()
 
@@ -181,7 +199,7 @@ if (BUILD_ENABLE_AVX512 AND NOT APPLE)
   INCLUDE(ConfigSimdLevel)
 endif ()
 
-set (EXAMPLE_DIRECTORY ${CMAKE_SOURCE_DIR}/examples)
+set (EXAMPLE_DIRECTORY ${PROJECT_SOURCE_DIR}/examples)
 
 add_subdirectory(c++)
 
@@ -212,4 +230,6 @@ if (BUILD_CPP_TESTS)
   endif ()
 endif ()
 
-INCLUDE(CheckFormat)
+if (ORC_ENABLE_CLANG_TOOLS)
+  INCLUDE(CheckFormat)
+endif ()
