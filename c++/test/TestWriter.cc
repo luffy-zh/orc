@@ -32,6 +32,8 @@
 #include <memory>
 #include <sstream>
 
+#include <ranges>
+
 #ifdef __clang__
 DIAGNOSTIC_IGNORE("-Wmissing-variable-declarations")
 #endif
@@ -352,7 +354,12 @@ namespace orc {
     if (enableAlignBlockBoundToRowGroup) {
       verifyCompressionBlockAlignment(reader, type->getSubtypeCount());
     }
-
+    if constexpr (std::endian::native == std::endian::big)
+        std::cout << "big-endian\n";
+    else if constexpr (std::endian::native == std::endian::little)
+        std::cout << "little-endian\n";
+    else
+        std::cout << "mixed-endian\n";
     EXPECT_FALSE(rowReader->next(*batch));
   }
 
