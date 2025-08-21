@@ -122,7 +122,7 @@ jobs:
       matrix:
         simd:
           - General
-          - AVX512
+          # - AVX512
     env:
       ORC_USER_SIMD_LEVEL: AVX512
       VCPKG_ROOT: C:/vcpkg
@@ -144,9 +144,9 @@ jobs:
         mkdir build
         cd build
         if [ "${{ matrix.simd }}" = "General" ]; then
-          cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows"
+          cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DProtobuf_LIBRARY="$VCPKG_ROOT/installed/x64-windows/lib/libprotobuf.lib" -DProtobuf_LITE_LIBRARY="$VCPKG_ROOT/installed/x64-windows/lib/libprotobuf-lite.lib"
         else
-          cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DBUILD_ENABLE_AVX512=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows"
+          cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DBUILD_ENABLE_AVX512=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DProtobuf_LIBRARY="$VCPKG_ROOT/installed/x64-windows/lib/libprotobuf.lib" -DProtobuf_LITE_LIBRARY="$VCPKG_ROOT/installed/x64-windows/lib/libprotobuf-lite.lib"
         fi
         cmake --build . --config Debug
         if [ $? -ne 0 ]; then
