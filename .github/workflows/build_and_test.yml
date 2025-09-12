@@ -141,11 +141,6 @@ jobs:
         vcpkg install snappy:x64-windows
         vcpkg install zstd:x64-windows
         vcpkg install lz4:x64-windows
-    - name: Set TZDIR for Arrow/ORC tests
-      shell: pwsh
-      run: |
-        $tz = "$Env:GITHUB_WORKSPACE\build\tzdata_ep-prefix\src\tzdata_ep\share\zoneinfo"
-        "TZDIR=$tz" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
     - name: "Build and Test"
       shell: bash
       run: |
@@ -159,6 +154,23 @@ jobs:
           ls -la
           exit 1
         fi
+
+        # Fix timezone files location issue
+        # Based on the error message, timezone files are in the "right" subdirectory
+        # but the code is trying to access them from the parent directory.
+        # We need to copy the timezone files from the "right" subdirectory to the parent directory.
+        if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
+          echo "Copying timezone files from 'right' directory to 'zoneinfo' directory"
+          # Create the parent directory if it doesn't exist
+          mkdir -p tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo
+          # Copy all timezone files from the "right" subdirectory to the parent directory
+          cp -r tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right/* tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/
+        fi
+
+        # Set TZDIR environment variable to ensure it points to the correct location
+        export TZDIR="$(pwd)/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo"
+
+        # Run tests
         ctest -C Debug --output-on-failure
         if [ $? -ne 0 ]; then
           echo "Tests failed"
