@@ -138,6 +138,7 @@ jobs:
       run: |
         vcpkg install zlib:x64-windows
         vcpkg install protobuf:x64-windows
+        vcpkg install snappy:x64-windows
     - name: "Build and Test"
       shell: bash
       run: |
