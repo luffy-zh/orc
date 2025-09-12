@@ -139,6 +139,8 @@ jobs:
         vcpkg install zlib:x64-windows
         vcpkg install protobuf:x64-windows
         vcpkg install snappy:x64-windows
+        vcpkg install zstd:x64-windows
+        vcpkg install lz4:x64-windows
     - name: "Build and Test"
       shell: bash
       run: |
@@ -152,6 +154,9 @@ jobs:
           ls -la
           exit 1
         fi
+        # Set TZDIR to point to the timezone data directory
+        # The path is resolved from the tzdata_ep external project directory structure
+        export TZDIR="$(pwd)/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo"
         ctest -C Debug --output-on-failure
         if [ $? -ne 0 ]; then
           echo "Tests failed"
