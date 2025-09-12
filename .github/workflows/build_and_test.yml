@@ -155,18 +155,20 @@ jobs:
           exit 1
         fi
         # Set TZDIR to point to the timezone data directory
-        # Based on the error message and CMake config, the timezone files are in the "right" subdirectory
-        # The error shows: "D:/a/orc/orc/build/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right/../../share/zoneinfo/GMT"
-        # This means the code is looking for GMT in the zoneinfo directory, but the files are actually in the "right" subdirectory
-        # According to the Timezone.cc code, Windows has a special case that returns a hardcoded path
-        # We need to make sure the timezone files are in the right place
+        # Based on the error message, the timezone files are in the "right" subdirectory
+        # but the code is trying to access them from the parent directory.
+        # We need to ensure the timezone files are accessible at the expected location.
+        
+        # First, check if the timezone files exist in the "right" subdirectory
         if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
           echo "Copying timezone files from 'right' directory to 'zoneinfo' directory"
+          # Create the parent directory if it doesn't exist
           mkdir -p tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo
+          # Copy all timezone files from the "right" subdirectory to the parent directory
           cp -r tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right/* tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/
         fi
-        # For Windows builds, we also need to override the hardcoded path in Timezone.cc
-        # by setting the TZDIR environment variable
+        
+        # Set TZDIR environment variable to ensure it points to the correct location
         export TZDIR="$(pwd)/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo"
         ctest -C Debug --output-on-failure
         if [ $? -ne 0 ]; then
