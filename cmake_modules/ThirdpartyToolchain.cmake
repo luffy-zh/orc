@@ -214,6 +214,7 @@ if (ORC_PACKAGE_KIND STREQUAL "conan")
   list (APPEND ORC_SYSTEM_DEPENDENCIES ZLIB)
   list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:ZLIB::ZLIB>")
 elseif (ORC_PACKAGE_KIND STREQUAL "vcpkg")
+  # For vcpkg, we need to use the module mode instead of config mode
   find_package(ZLIB REQUIRED)
   add_library (orc_zlib INTERFACE IMPORTED)
   target_link_libraries(orc_zlib INTERFACE ZLIB::ZLIB)
