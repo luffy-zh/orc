@@ -141,6 +141,7 @@ jobs:
         vcpkg install snappy:x64-windows
         vcpkg install zstd:x64-windows
         vcpkg install lz4:x64-windows
+        vcpkg install getopt-for-visual-studio:x64-windows
     - name: "Build and Test"
       shell: bash
       run: |
@@ -148,7 +149,7 @@ jobs:
         cd build
         # Set TZDIR for the build process
         export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
-        cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DORC_PACKAGE_KIND=vcpkg
+        cmake .. -DANALYZE_JAVA=OFF -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DORC_PACKAGE_KIND=vcpkg
         cmake --build . --config Debug
         if [ $? -ne 0 ]; then
           echo "Build failed"
