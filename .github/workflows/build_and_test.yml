@@ -146,54 +146,25 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DORC_PACKAGE_KIND=vcpkg
+        # Set TZDIR for the build process
+        export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        cmake .. -G -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DORC_PACKAGE_KIND=vcpkg
         cmake --build . --config Debug
         if [ $? -ne 0 ]; then
           echo "Build failed"
           ls -la
           exit 1
         fi
-        
-        # Fix timezone files location issue
-        # Based on the error message, timezone files are in the "right" subdirectory
-        # but the code is trying to access them from the parent directory.
-        # We need to copy the timezone files from the "right" subdirectory to the parent directory.
-        if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
-          echo "Copying timezone files from 'right' directory to 'zoneinfo' directory"
-          # Create the parent directory if it doesn't exist
-          mkdir -p tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo
-          # Copy all timezone files from the "right" subdirectory to the parent directory
-          cp -r tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right/* tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/
-        fi
-        
-        # Set TZDIR environment variable to ensure it points to the correct location
-        export TZDIR="$(pwd)/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo"
-        
-        # Run tests, excluding problematic timezone-related tests on Windows
-        # Disable specific failing tests: TestTimezone.testTzdbFromCondaEnv and all WriterTest.timestamp tests
-        ctest -C Debug --output-on-failure -E "TestTimezone.testTzdbFromCondaEnv|WriterTest.writeTimestamp|WriterTest.writeNegativeTimestamp|WriterTest.writeTimestampInstant|TestTimezone.testZoneCache"
-        if [ $? -ne 0 ]; then
-          echo "Tests failed"
-          ls -la
-          cat DartConfiguration.tcl || echo "No DartConfiguration.tcl"
-          # Try to list timezone files to help with debugging
-          echo "=== Timezone files ==="
-          find . -name "tzdata_ep*" -type d | head -10
-          if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo" ]; then
-            ls -la tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo
-          fi
-          if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
-            ls -la tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right
-          fi
-          exit 1
-        fi
-    # - name: "Upload Build Artifacts"
-    #   if: always()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: windows-build-logs-${{ matrix.simd }}
-    #     path: build/
-    #     if-no-files-found: ignore
+        # Also set TZDIR for tests
+        export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        ctest -C Debug --output-on-failure
+    - name: "Upload Build Artifacts"
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build-logs-${{ matrix.simd }}
+        path: build/
+        if-no-files-found: ignore
 
   # simdUbuntu:
   #   name: "SIMD programming using C++ intrinsic functions on ${{ matrix.os }}"

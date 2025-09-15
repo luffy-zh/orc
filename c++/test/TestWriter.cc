@@ -626,7 +626,7 @@ namespace orc {
     }
   }
 
-  TEST_P(WriterTest, DISABLED_writeTimestamp) {
+  TEST_P(WriterTest, writeTimestamp) {
     MemoryOutputStream memStream(DEFAULT_MEM_STREAM_SIZE);
     MemoryPool* pool = getDefaultPool();
     std::unique_ptr<Type> type(Type::buildTypeFromString("struct<col1:timestamp>"));
@@ -675,7 +675,7 @@ namespace orc {
     }
   }
 
-  TEST_P(WriterTest, DISABLED_writeNegativeTimestamp) {
+  TEST_P(WriterTest, writeNegativeTimestamp) {
     MemoryOutputStream memStream(DEFAULT_MEM_STREAM_SIZE);
     MemoryPool* pool = getDefaultPool();
     std::unique_ptr<Type> type(Type::buildTypeFromString("struct<a:timestamp>"));
@@ -804,7 +804,7 @@ namespace orc {
     }
   }
 
-  TEST_P(WriterTest, DISABLED_writeTimestampWithTimezone) {
+  TEST_P(WriterTest, writeTimestampWithTimezone) {
     const int IS_DST = 1, NOT_DST = 0;
     testWriteTimestampWithTimezone(fileVersion, "GMT", "GMT", "2001-11-12 18:31:01");
     // behavior for Apache Orc (writer & reader timezone can change)
@@ -842,7 +842,7 @@ namespace orc {
   }
 #endif
 
-  TEST_P(WriterTest, DISABLED_writeTimestampInstant) {
+  TEST_P(WriterTest, writeTimestampInstant) {
     MemoryOutputStream memStream(DEFAULT_MEM_STREAM_SIZE);
     MemoryPool* pool = getDefaultPool();
     std::unique_ptr<Type> type(

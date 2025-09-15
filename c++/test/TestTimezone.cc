@@ -442,7 +442,7 @@ namespace orc {
     }
   }
 
-  TEST(TestTimezone, DISABLED_testTzdbFromCondaEnv) {
+  TEST(TestTimezone, testTzdbFromCondaEnv) {
     const char* tzDir = std::getenv("TZDIR");
     // test only makes sense if TZDIR exists
     if (tzDir != nullptr) {
