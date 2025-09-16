@@ -147,7 +147,11 @@ jobs:
         mkdir build
         cd build
         # Set TZDIR for the build process
-        export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
+          export TZDIR="$PWD/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right"
+        else
+          export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        fi
         cmake .. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_LIBHDFSPP=OFF -DBUILD_TOOLS=OFF -DBUILD_JAVA=OFF -DANALYZE_JAVA=OFF -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DProtobuf_ROOT="$VCPKG_ROOT/installed/x64-windows" -DCMAKE_PREFIX_PATH="$VCPKG_ROOT/installed/x64-windows" -DORC_PACKAGE_KIND=vcpkg
         cmake --build . --config Debug
         if [ $? -ne 0 ]; then
@@ -156,7 +160,11 @@ jobs:
           exit 1
         fi
         # Also set TZDIR for tests
-        export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        if [ -d "tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right" ]; then
+          export TZDIR="$PWD/tzdata_ep-prefix/src/tzdata_ep/share/zoneinfo/right"
+        else
+          export TZDIR="$VCPKG_ROOT/installed/x64-windows/share/zoneinfo"
+        fi
         ctest -C Debug --output-on-failure
     - name: "Upload Build Artifacts"
       if: always()
