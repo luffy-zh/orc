@@ -141,7 +141,6 @@ jobs:
         vcpkg install snappy:x64-windows
         vcpkg install zstd:x64-windows
         vcpkg install lz4:x64-windows
-        vcpkg install getopt:x64-windows
     - name: "Build and Test"
       shell: bash
       run: |
